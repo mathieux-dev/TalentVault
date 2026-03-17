@@ -1,10 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { useCreateCandidate, useUploadResume } from '@/hooks/useCandidates';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -25,6 +30,8 @@ type FormValues = z.infer<typeof schema>;
 
 export default function NewCandidatePage() {
   const router = useRouter();
+  const { isCheckingAuth } = useRequireAuth();
+  const [submitError, setSubmitError] = useState('');
   const createCandidate = useCreateCandidate();
   const uploadResume = useUploadResume();
 
@@ -37,6 +44,7 @@ export default function NewCandidatePage() {
   });
 
   const onSubmit = async (values: FormValues) => {
+    setSubmitError('');
     try {
       const created = await createCandidate.mutateAsync({
         name: values.name,
@@ -44,7 +52,6 @@ export default function NewCandidatePage() {
         phone: values.phone,
         city: values.city,
         seniority: values.seniority,
-        state: 'N/A',
       });
 
       await uploadResume.mutateAsync({
@@ -54,63 +61,68 @@ export default function NewCandidatePage() {
 
       router.push('/candidates');
     } catch {
-      alert('Não foi possível cadastrar o candidato.');
+      setSubmitError('Não foi possível cadastrar o candidato.');
     }
   };
 
+  if (isCheckingAuth) {
+    return <main className="p-6">Validando acesso...</main>;
+  }
+
   return (
     <main className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-2xl rounded bg-white p-6 shadow">
+      <Card className="mx-auto max-w-2xl">
         <h1 className="mb-6 text-2xl font-bold">Novo Candidato</h1>
+
+        {submitError && <p className="mb-4 text-sm text-red-600">{submitError}</p>}
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="mb-1 block text-sm font-medium">Nome</label>
-            <input className="w-full rounded border px-3 py-2" {...register('name')} />
+            <Input {...register('name')} />
             {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium">Email</label>
-            <input className="w-full rounded border px-3 py-2" type="email" {...register('email')} />
+            <Input type="email" {...register('email')} />
             {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium">Telefone</label>
-            <input className="w-full rounded border px-3 py-2" {...register('phone')} />
+            <Input {...register('phone')} />
             {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium">Cidade</label>
-            <input className="w-full rounded border px-3 py-2" {...register('city')} />
+            <Input {...register('city')} />
             {errors.city && <p className="text-sm text-red-600">{errors.city.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium">Senioridade</label>
-            <input className="w-full rounded border px-3 py-2" {...register('seniority')} />
+            <Input {...register('seniority')} />
             {errors.seniority && <p className="text-sm text-red-600">{errors.seniority.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium">Resume Upload (PDF)</label>
-            <input className="w-full rounded border px-3 py-2" type="file" accept=".pdf,application/pdf" {...register('resume')} />
+            <Input type="file" accept=".pdf,application/pdf" {...register('resume')} />
             {errors.resume && (
               <p className="text-sm text-red-600">{String(errors.resume.message ?? 'Arquivo inválido')}</p>
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             disabled={createCandidate.isPending || uploadResume.isPending}
           >
             {createCandidate.isPending || uploadResume.isPending ? 'Salvando...' : 'Cadastrar'}
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
     </main>
   );
 }

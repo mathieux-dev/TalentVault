@@ -25,7 +25,6 @@ public class CreateCandidateRequestValidator : AbstractValidator<CreateCandidate
             .MaximumLength(100).WithMessage("Cidade não pode exceder 100 caracteres");
 
         RuleFor(x => x.State)
-            .NotEmpty().WithMessage("Estado é obrigatório")
             .MaximumLength(50).WithMessage("Estado não pode exceder 50 caracteres");
 
         RuleFor(x => x.Seniority)

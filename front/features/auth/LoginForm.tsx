@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLogin } from './useLogin';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -14,6 +18,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
+  const [submitError, setSubmitError] = useState('');
   const {
     register,
     handleSubmit,
@@ -26,62 +31,42 @@ export const LoginForm = () => {
   const { mutate: login, isPending } = useLogin();
 
   const onSubmit = (data: LoginFormData) => {
+    setSubmitError('');
     login(data, {
       onSuccess: () => {
-        router.push('/candidates');
+        router.push('/dashboard');
       },
       onError: () => {
-        alert('Email ou senha inválidos');
+        setSubmitError('Email ou senha inválidos');
       },
     });
   };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-8 rounded shadow-md w-96"
-      >
-        <h1 className="text-2xl font-bold mb-6">TalentVault</h1>
+      <Card className="w-96">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <h1 className="mb-6 text-2xl font-bold">TalentVault</h1>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            {...register('email')}
-            type="email"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-            disabled={isPending}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
-        </div>
+          {submitError && <p className="mb-4 text-sm text-red-600">{submitError}</p>}
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700">
-            Senha
-          </label>
-          <input
-            {...register('password')}
-            type="password"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-            disabled={isPending}
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
-          )}
-        </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <Input {...register('email')} type="email" className="mt-1" disabled={isPending} />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+          </div>
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          {isPending ? 'Entrando...' : 'Entrar'}
-        </button>
-      </form>
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700">Senha</label>
+            <Input {...register('password')} type="password" className="mt-1" disabled={isPending} />
+            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+          </div>
+
+          <Button type="submit" disabled={isPending} className="w-full">
+            {isPending ? 'Entrando...' : 'Entrar'}
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 };

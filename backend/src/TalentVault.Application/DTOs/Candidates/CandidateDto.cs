@@ -5,7 +5,7 @@ public record CreateCandidateRequest(
     string Email,
     string Phone,
     string City,
-    string State,
+    string? State,
     string Seniority);
 
 public record CandidateResponse(

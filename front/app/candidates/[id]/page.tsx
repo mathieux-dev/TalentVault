@@ -2,13 +2,21 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { useCandidate } from '@/hooks/useCandidates';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 export default function CandidateDetailsPage() {
   const params = useParams<{ id: string }>();
   const candidateId = params?.id;
+  const { isCheckingAuth } = useRequireAuth();
 
   const { data, isLoading, isError, error } = useCandidate(candidateId ?? '');
+
+  if (isCheckingAuth) {
+    return <main className="p-6">Validando acesso...</main>;
+  }
 
   if (isLoading) {
     return <main className="p-6">Carregando candidato...</main>;
@@ -24,7 +32,7 @@ export default function CandidateDetailsPage() {
 
   return (
     <main className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-3xl rounded bg-white p-6 shadow">
+      <Card className="mx-auto max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Detalhes do Candidato</h1>
           <Link href="/candidates" className="text-blue-600 hover:text-blue-800">
@@ -46,15 +54,14 @@ export default function CandidateDetailsPage() {
               href={data.resumeUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
             >
-              Download resume
+              <Button>Download resume</Button>
             </a>
           ) : (
             <p className="text-gray-600">Currículo ainda não enviado.</p>
           )}
         </div>
-      </div>
+      </Card>
     </main>
   );
 }

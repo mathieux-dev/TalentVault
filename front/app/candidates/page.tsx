@@ -2,12 +2,17 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Table } from '@/components/ui/Table';
 import { useCandidates } from '@/hooks/useCandidates';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function CandidatesPage() {
   const [page, setPage] = useState(1);
+  const { isCheckingAuth } = useRequireAuth();
   const { data, isLoading, isError, error } = useCandidates(page, DEFAULT_PAGE_SIZE);
 
   const totalPages = useMemo(() => {
@@ -15,16 +20,17 @@ export default function CandidatesPage() {
     return Math.max(1, Math.ceil(data.total / data.pageSize));
   }, [data]);
 
+  if (isCheckingAuth) {
+    return <main className="p-6">Validando acesso...</main>;
+  }
+
   return (
     <main className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-5xl rounded bg-white p-6 shadow">
+      <Card className="mx-auto max-w-5xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Candidatos</h1>
-          <Link
-            href="/candidates/new"
-            className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-          >
-            Novo candidato
+          <Link href="/candidates/new">
+            <Button>Novo candidato</Button>
           </Link>
         </div>
 
@@ -38,8 +44,7 @@ export default function CandidatesPage() {
 
         {!isLoading && !isError && data && (
           <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-200">
+            <Table>
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="border border-gray-200 px-4 py-2 text-left">Nome</th>
@@ -75,8 +80,7 @@ export default function CandidatesPage() {
                     ))
                   )}
                 </tbody>
-              </table>
-            </div>
+            </Table>
 
             <div className="mt-6 flex items-center justify-between">
               <p className="text-sm text-gray-600">
@@ -84,27 +88,27 @@ export default function CandidatesPage() {
               </p>
 
               <div className="flex gap-2">
-                <button
+                <Button
                   type="button"
-                  className="rounded border px-3 py-2 disabled:opacity-50"
+                  variant="secondary"
                   onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                   disabled={page <= 1}
                 >
                   Anterior
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="rounded border px-3 py-2 disabled:opacity-50"
+                  variant="secondary"
                   onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                   disabled={page >= totalPages}
                 >
                   Próxima
-                </button>
+                </Button>
               </div>
             </div>
           </>
         )}
-      </div>
+      </Card>
     </main>
   );
 }

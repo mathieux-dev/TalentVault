@@ -28,6 +28,6 @@ export interface CreateCandidateRequest {
   email: string;
   phone: string;
   city: string;
-  state: string;
+  state?: string;
   seniority: string;
 }
