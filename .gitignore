@@ -1,0 +1,44 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+*.user
+*.suo
+*.cache
+*.pdb
+
+# NuGet
+**/packages/
+*.nupkg
+
+# Next.js / Node.js
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+**/.turbo/
+**/coverage/
+**/.npm/
+**/.pnpm-store/
+
+# TypeScript
+**/*.tsbuildinfo
+
+# Frontend build artifacts
+front/.vercel/

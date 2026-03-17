@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TalentVault.Api/TalentVault.Api.csproj" />
+  <Project Path="TalentVault.Application/TalentVault.Application.csproj" />
+  <Project Path="TalentVault.Domain/TalentVault.Domain.csproj" />
+  <Project Path="TalentVault.Infrastructure/TalentVault.Infrastructure.csproj" />
+  <Project Path="TalentVault.Shared/TalentVault.Shared.csproj" />
+</Solution>
