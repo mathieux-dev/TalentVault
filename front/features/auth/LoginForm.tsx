@@ -1,8 +1,10 @@
+'use client';
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLogin } from './useLogin';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -20,13 +22,13 @@ export const LoginForm = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const navigate = useNavigate();
+  const router = useRouter();
   const { mutate: login, isPending } = useLogin();
 
   const onSubmit = (data: LoginFormData) => {
     login(data, {
       onSuccess: () => {
-        navigate('/candidates');
+        router.push('/candidates');
       },
       onError: () => {
         alert('Email ou senha inválidos');
