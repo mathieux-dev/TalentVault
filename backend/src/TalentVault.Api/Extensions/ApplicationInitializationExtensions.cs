@@ -38,21 +38,59 @@ public static class ApplicationInitializationExtensions
     private static async Task SeedAsync(TalentVaultDbContext dbContext, SeedOptions seedOptions)
     {
         var company = await dbContext.Companies.FirstOrDefaultAsync(c => c.Name == seedOptions.CompanyName);
+        var companySlug = BuildCompanySlug(seedOptions.CompanySlug, seedOptions.CompanyName);
+
         if (company == null)
         {
             company = new Company
             {
                 Id = Guid.NewGuid(),
                 Name = seedOptions.CompanyName,
+                Slug = companySlug,
                 CreatedAt = DateTime.UtcNow
             };
 
             dbContext.Companies.Add(company);
             await dbContext.SaveChangesAsync();
         }
+        else if (!string.Equals(company.Slug, companySlug, StringComparison.Ordinal))
+        {
+            company.Slug = companySlug;
+            await dbContext.SaveChangesAsync();
+        }
 
         await EnsureUserAsync(dbContext, company.Id, seedOptions.Admin);
         await EnsureUserAsync(dbContext, company.Id, seedOptions.Hr);
+    }
+
+    private static string BuildCompanySlug(string? configuredSlug, string companyName)
+    {
+        if (!string.IsNullOrWhiteSpace(configuredSlug))
+        {
+            return configuredSlug.Trim().ToLowerInvariant();
+        }
+
+        var normalized = companyName.Trim().ToLowerInvariant();
+        var slugBuilder = new System.Text.StringBuilder();
+        var lastWasDash = false;
+
+        foreach (var character in normalized)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                slugBuilder.Append(character);
+                lastWasDash = false;
+                continue;
+            }
+
+            if (!lastWasDash)
+            {
+                slugBuilder.Append('-');
+                lastWasDash = true;
+            }
+        }
+
+        return slugBuilder.ToString().Trim('-');
     }
 
     private static async Task EnsureUserAsync(TalentVaultDbContext dbContext, Guid companyId, SeedUserOptions userOptions)
@@ -91,6 +129,7 @@ public class SeedOptions
 
     public bool Enabled { get; set; }
     public string CompanyName { get; set; } = "TalentVault Demo";
+    public string CompanySlug { get; set; } = "talentvault-demo";
     public SeedUserOptions Admin { get; set; } = new();
     public SeedUserOptions Hr { get; set; } = new();
 }

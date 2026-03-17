@@ -19,6 +19,12 @@ public class CompanyRepository : ICompanyRepository
         return await _context.Companies.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    public async Task<Company?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    {
+        return await _context.Companies
+            .FirstOrDefaultAsync(c => c.Slug == slug, cancellationToken);
+    }
+
     public async Task<IEnumerable<Company>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Companies.ToListAsync(cancellationToken);

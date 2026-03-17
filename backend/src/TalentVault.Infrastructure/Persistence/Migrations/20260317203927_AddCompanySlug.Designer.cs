@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TalentVault.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using TalentVault.Infrastructure.Persistence;
 namespace TalentVault.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TalentVaultDbContext))]
-    partial class TalentVaultDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317203927_AddCompanySlug")]
+    partial class AddCompanySlug
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

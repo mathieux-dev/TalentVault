@@ -25,7 +25,10 @@ public class TalentVaultDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Slug).IsRequired().HasMaxLength(100);
             entity.Property(e => e.CreatedAt).IsRequired();
+
+            entity.HasIndex(e => e.Slug).IsUnique();
         });
 
         // User configuration

@@ -7,6 +7,7 @@ namespace TalentVault.Application.Services;
 public interface ICandidateService
 {
     Task<CandidateResponse> CreateAsync(Guid companyId, CreateCandidateRequest request, CancellationToken cancellationToken = default);
+    Task<CandidateResponse> CreateWithResumeAsync(Guid companyId, CreateCandidateRequest request, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
     Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<CandidateResponse?> GetByIdAsync(Guid Id, Guid companyId, CancellationToken cancellationToken = default);
     Task<string> UploadResumeAsync(Guid candidateId, Guid companyId, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
@@ -41,6 +42,35 @@ public class CandidateService : ICandidateService
 
         var createdCandidate = await _candidateRepository.CreateAsync(candidate, cancellationToken);
         return MapToResponse(createdCandidate);
+    }
+
+    public async Task<CandidateResponse> CreateWithResumeAsync(Guid companyId, CreateCandidateRequest request, Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+    {
+        var createdCandidate = await _candidateRepository.CreateAsync(new Candidate
+        {
+            Id = Guid.NewGuid(),
+            CompanyId = companyId,
+            Name = request.Name,
+            Email = request.Email,
+            Phone = request.Phone,
+            City = request.City,
+            State = request.State ?? string.Empty,
+            Seniority = request.Seniority,
+            CreatedAt = DateTime.UtcNow
+        }, cancellationToken);
+
+        try
+        {
+            var resumeUrl = await _storageService.UploadResumeAsync(createdCandidate.Id, fileStream, fileName, cancellationToken);
+            createdCandidate.ResumeUrl = resumeUrl;
+            await _candidateRepository.UpdateAsync(createdCandidate, cancellationToken);
+            return MapToResponse(createdCandidate);
+        }
+        catch
+        {
+            await _candidateRepository.DeleteAsync(createdCandidate.Id, companyId, cancellationToken);
+            throw;
+        }
     }
 
     public async Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)

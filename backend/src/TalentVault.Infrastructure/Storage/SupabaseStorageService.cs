@@ -28,7 +28,7 @@ public class SupabaseStorageService : IStorageService
         if (extension != ".pdf")
             throw new InvalidOperationException("Apenas arquivos PDF são permitidos");
 
-        var objectPath = $"resumes/{candidateId}.pdf";
+        var objectPath = GetObjectPath(candidateId);
         var url = $"{_options.Url}/storage/v1/object/{_options.BucketName}/{objectPath}";
 
         var client = _httpClientFactory.CreateClient("Supabase");
@@ -48,7 +48,7 @@ public class SupabaseStorageService : IStorageService
 
     public async Task<Stream> DownloadResumeAsync(Guid candidateId, CancellationToken cancellationToken = default)
     {
-        var objectPath = $"resumes/{candidateId}.pdf";
+        var objectPath = GetObjectPath(candidateId);
         var url = $"{_options.Url}/storage/v1/object/authenticated/{_options.BucketName}/{objectPath}";
 
         var client = _httpClientFactory.CreateClient("Supabase");
@@ -66,7 +66,7 @@ public class SupabaseStorageService : IStorageService
 
     public async Task DeleteResumeAsync(Guid candidateId, CancellationToken cancellationToken = default)
     {
-        var objectPath = $"resumes/{candidateId}.pdf";
+        var objectPath = GetObjectPath(candidateId);
         var url = $"{_options.Url}/storage/v1/object/{_options.BucketName}";
 
         var client = _httpClientFactory.CreateClient("Supabase");
@@ -78,5 +78,10 @@ public class SupabaseStorageService : IStorageService
 
         var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    private static string GetObjectPath(Guid candidateId)
+    {
+        return $"{candidateId}.pdf";
     }
 }

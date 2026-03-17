@@ -24,3 +24,13 @@ public record CandidateListResponse(
     int Page,
     int PageSize,
     int Total);
+
+public class PublicCandidateSubmissionRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string? State { get; set; }
+    public string Seniority { get; set; } = string.Empty;
+}

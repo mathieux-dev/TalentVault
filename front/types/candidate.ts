@@ -31,3 +31,7 @@ export interface CreateCandidateRequest {
   state?: string;
   seniority: string;
 }
+
+export interface PublicCandidateSubmissionRequest extends CreateCandidateRequest {
+  file: File;
+}
