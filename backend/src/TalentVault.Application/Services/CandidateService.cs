@@ -10,6 +10,7 @@ public interface ICandidateService
     Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<CandidateResponse?> GetByIdAsync(Guid Id, Guid companyId, CancellationToken cancellationToken = default);
     Task<string> UploadResumeAsync(Guid candidateId, Guid companyId, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
+    Task<Stream> DownloadResumeAsync(Guid candidateId, Guid companyId, CancellationToken cancellationToken = default);
 }
 
 public class CandidateService : ICandidateService
@@ -33,7 +34,7 @@ public class CandidateService : ICandidateService
             Email = request.Email,
             Phone = request.Phone,
             City = request.City,
-            State = request.State,
+            State = request.State ?? string.Empty,
             Seniority = request.Seniority,
             CreatedAt = DateTime.UtcNow
         };
@@ -78,6 +79,15 @@ public class CandidateService : ICandidateService
         await _candidateRepository.UpdateAsync(candidate, cancellationToken);
 
         return resumeUrl;
+    }
+
+    public async Task<Stream> DownloadResumeAsync(Guid candidateId, Guid companyId, CancellationToken cancellationToken = default)
+    {
+        var candidate = await _candidateRepository.GetByIdAsync(candidateId, companyId, cancellationToken);
+        if (candidate == null)
+            throw new InvalidOperationException("Candidato não encontrado");
+
+        return await _storageService.DownloadResumeAsync(candidateId, cancellationToken);
     }
 
     private static CandidateResponse MapToResponse(Candidate candidate)

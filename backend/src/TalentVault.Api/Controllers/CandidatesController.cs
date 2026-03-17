@@ -115,6 +115,25 @@ public class CandidatesController : ControllerBase
         }
     }
 
+    [HttpGet("{id}/resume")]
+    public async Task<IActionResult> DownloadResume([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var companyId = GetCompanyIdFromToken();
+        try
+        {
+            var stream = await _candidateService.DownloadResumeAsync(id, companyId, cancellationToken);
+            return File(stream, "application/pdf", "resume.pdf");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { success = false, errors = new[] { ex.Message } });
+        }
+        catch
+        {
+            return StatusCode(500, new { success = false, errors = new[] { "Erro ao baixar o arquivo" } });
+        }
+    }
+
     [HttpPost("{id}/resume")]
     public async Task<IActionResult> UploadResume([FromRoute] Guid id, IFormFile file, CancellationToken cancellationToken)
     {

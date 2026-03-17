@@ -1,59 +1,82 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
 using TalentVault.Application.Services;
 
 namespace TalentVault.Infrastructure.Storage;
 
 public class SupabaseStorageService : IStorageService
 {
-    private const string BucketName = "resumes";
     private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
 
-    public SupabaseStorageService()
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly SupabaseOptions _options;
+
+    public SupabaseStorageService(IHttpClientFactory httpClientFactory, IOptions<SupabaseOptions> options)
     {
-        // TODO: Initialize Supabase client with configuration
-        // var supabaseUrl = configuration["Supabase:Url"];
-        // var supabaseKey = configuration["Supabase:Key"];
-        // _client = new SupabaseClient(supabaseUrl, supabaseKey);
+        _httpClientFactory = httpClientFactory;
+        _options = options.Value;
     }
 
     public async Task<string> UploadResumeAsync(Guid candidateId, Stream fileStream, string fileName, CancellationToken cancellationToken = default)
     {
-        // Validate file size
         if (fileStream.Length > MaxFileSizeBytes)
-        {
             throw new InvalidOperationException("Arquivo excede o tamanho máximo de 5MB");
-        }
 
-        // Validate file extension
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         if (extension != ".pdf")
-        {
             throw new InvalidOperationException("Apenas arquivos PDF são permitidos");
-        }
 
-        // TODO: Implement actual upload to Supabase
-        // var path = $"resumes/{candidateId}.pdf";
-        // await _client.Storage.From(BucketName).Upload(fileStream, path);
-        // return $"{supabaseUrl}/storage/v1/object/public/{BucketName}/{path}";
+        var objectPath = $"resumes/{candidateId}.pdf";
+        var url = $"{_options.Url}/storage/v1/object/{_options.BucketName}/{objectPath}";
 
-        // Placeholder return for now
-        return $"https://placeholder.supabase.co/storage/v1/object/public/{BucketName}/resumes/{candidateId}.pdf";
+        var client = _httpClientFactory.CreateClient("Supabase");
+        using var request = new HttpRequestMessage(HttpMethod.Put, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ServiceRoleKey);
+        request.Headers.Add("x-upsert", "true");
+
+        using var content = new StreamContent(fileStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+        request.Content = content;
+
+        var response = await client.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return $"{_options.Url}/storage/v1/object/public/{_options.BucketName}/{objectPath}";
     }
 
     public async Task<Stream> DownloadResumeAsync(Guid candidateId, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement actual download from Supabase
-        // var path = $"resumes/{candidateId}.pdf";
-        // return await _client.Storage.From(BucketName).Download(path);
-        
-        throw new NotImplementedException("Download não implementado");
+        var objectPath = $"resumes/{candidateId}.pdf";
+        var url = $"{_options.Url}/storage/v1/object/authenticated/{_options.BucketName}/{objectPath}";
+
+        var client = _httpClientFactory.CreateClient("Supabase");
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ServiceRoleKey);
+
+        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var memoryStream = new MemoryStream();
+        await response.Content.CopyToAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+        return memoryStream;
     }
 
     public async Task DeleteResumeAsync(Guid candidateId, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement actual delete from Supabase
-        // var path = $"resumes/{candidateId}.pdf";
-        // await _client.Storage.From(BucketName).Remove(new List<string> { path });
-        
-        await Task.CompletedTask;
+        var objectPath = $"resumes/{candidateId}.pdf";
+        var url = $"{_options.Url}/storage/v1/object/{_options.BucketName}";
+
+        var client = _httpClientFactory.CreateClient("Supabase");
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ServiceRoleKey);
+
+        var body = JsonSerializer.Serialize(new { prefixes = new[] { objectPath } });
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+
+        var response = await client.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 }

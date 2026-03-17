@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.Configure<SupabaseOptions>(builder.Configuration.GetSection(SupabaseOptions.SectionName));
 
 // Add services
 builder.Services.AddControllers();
@@ -28,6 +29,7 @@ builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 
 // Register services
+builder.Services.AddHttpClient("Supabase");
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
