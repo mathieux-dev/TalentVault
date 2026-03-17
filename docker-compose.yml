@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: talentvault-postgres
+    environment:
+      POSTGRES_DB: talentvault_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d talentvault_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend/src
+      dockerfile: TalentVault.Api/Dockerfile
+    container_name: talentvault-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=talentvault_dev;Username=postgres;Password=postgres
+      DatabaseInitialization__ApplyMigrationsOnStartup: "true"
+      Seed__Enabled: "true"
+      Supabase__Url: ${SUPABASE_URL:-}
+      Supabase__ServiceRoleKey: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      Supabase__BucketName: ${SUPABASE_BUCKET_NAME:-resumes}
+      Jwt__SecretKey: ${JWT_SECRET_KEY:-your-secret-key-change-this-in-production-at-least-32-characters-long}
+      Jwt__Issuer: ${JWT_ISSUER:-TalentVault}
+      Jwt__Audience: ${JWT_AUDIENCE:-TalentVaultUsers}
+      Jwt__ExpirationMinutes: ${JWT_EXPIRATION_MINUTES:-480}
+    ports:
+      - "5015:8080"
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5015/api/v1}
+    container_name: talentvault-front
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5015/api/v1}
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
