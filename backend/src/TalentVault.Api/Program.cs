@@ -1,5 +1,6 @@
 using TalentVault.Infrastructure.Persistence;
 using TalentVault.Infrastructure.Repositories;
+using TalentVault.Infrastructure.Storage;
 using TalentVault.Application.Repositories;
 using TalentVault.Application.Services;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,8 @@ builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 
 // Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 
 // Configure JWT authentication
 const string secretKey = "your-secret-key-change-this-in-production-at-least-32-characters-long";
