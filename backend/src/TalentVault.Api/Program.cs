@@ -1,3 +1,4 @@
+using TalentVault.Api.Extensions;
 using TalentVault.Infrastructure.Persistence;
 using TalentVault.Infrastructure.Repositories;
 using TalentVault.Infrastructure.Storage;
@@ -9,6 +10,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
 // Add services
 builder.Services.AddControllers();
@@ -30,7 +33,9 @@ builder.Services.AddScoped<ICandidateService, CandidateService>();
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 
 // Configure JWT authentication
-const string secretKey = "your-secret-key-change-this-in-production-at-least-32-characters-long";
+var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+    ?? throw new InvalidOperationException("Jwt configuration is missing.");
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -38,11 +43,11 @@ builder.Services
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
             ValidateIssuer = true,
-            ValidIssuer = "TalentVault",
+            ValidIssuer = jwtOptions.Issuer,
             ValidateAudience = true,
-            ValidAudience = "TalentVaultUsers",
+            ValidAudience = jwtOptions.Audience,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
@@ -51,6 +56,8 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+await app.InitializeDatabaseAsync();
 
 app.UseAuthentication();
 app.UseAuthorization();

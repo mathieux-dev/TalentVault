@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using TalentVault.Application.DTOs.Auth;
 using TalentVault.Application.Repositories;
 using TalentVault.Application.Services;
-using BCrypt.Net;
 
 namespace TalentVault.Api.Controllers;
 
@@ -22,24 +21,35 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        // This is a basic implementation - in a real app, you'd need to validate the user exists first
-        // For now, we'll assume the user exists and validate credentials
-        
         if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
             return BadRequest(new
             {
                 success = false,
+                data = (object?)null,
                 errors = new[] { "Email and password are required" }
             });
         }
 
-        // In a production system, you'd need to know the CompanyId first
-        // This is a placeholder that would need to be adjusted based on your auth flow
-        return Unauthorized(new
+        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
-            success = false,
-            errors = new[] { "Invalid credentials" }
+            return Unauthorized(new
+            {
+                success = false,
+                data = (object?)null,
+                errors = new[] { "Invalid credentials" }
+            });
+        }
+
+        var token = _authService.GenerateJwtToken(user.Id, user.CompanyId, user.Role);
+        var response = new LoginResponse(token, user.Id, user.CompanyId, user.Role);
+
+        return Ok(new
+        {
+            success = true,
+            data = response,
+            errors = Array.Empty<string>()
         });
     }
 }
