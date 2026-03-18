@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
         }
 
         var token = _authService.GenerateJwtToken(user.Id, user.CompanyId, user.Role);
-        var response = new LoginResponse(token, user.Id, user.CompanyId, user.Role);
+        var response = new LoginResponse(token, user.Id, user.CompanyId, user.Role, user.Email, user.Name);
 
         return Ok(new
         {
