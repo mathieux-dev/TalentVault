@@ -47,6 +47,7 @@ builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddHttpClient("Supabase");
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 builder.Services.AddScoped<IValidator<PublicCandidateSubmissionRequest>, PublicCandidateSubmissionRequestValidator>();
 
