@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { candidatesService } from '@/services/candidates';
+import { BrandLogo } from '@/components/branding/BrandLogo';
+import { branding, hasFormBackground } from '@/config/branding';
 
 const maxFileSize = 5 * 1024 * 1024;
 
@@ -76,15 +78,29 @@ export default function PublicApplicationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fef3c7,_#fff7ed_45%,_#f8fafc_100%)] px-4 py-10">
-      <Card className="mx-auto max-w-2xl border border-amber-200 bg-white/95 shadow-xl shadow-amber-100">
+    <main
+      className="min-h-screen px-4 py-8 sm:py-10"
+      style={
+        hasFormBackground
+          ? {
+              backgroundImage: `linear-gradient(rgba(15,23,42,0.55), rgba(15,23,42,0.55)), url(${branding.formBackgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : {
+              background:
+                'radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 12%, #ffffff), #f8fafc 45%, #eef2ff 100%)',
+            }
+      }
+    >
+      <Card className="mx-auto max-w-2xl bg-white/95 p-5 sm:p-8">
         <div className="mb-8 space-y-3">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">TalentVault</p>
-          <h1 className="text-3xl font-bold text-slate-900">Envie seu curriculo</h1>
+          <BrandLogo subtitle="Cadastro de candidatura" />
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Envie seu currículo</h1>
           <p className="text-sm leading-6 text-slate-600">
             Preencha seus dados e anexe um PDF para entrar no banco de talentos desta empresa.
           </p>
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Empresa: {companySlug}</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Empresa: {companySlug}</p>
         </div>
 
         {submitError && <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</p>}

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import type { CSSProperties } from 'react';
 import './globals.css';
 import Providers from './providers';
+import { branding } from '@/config/branding';
 
 export const metadata: Metadata = {
   title: 'TalentVault',
@@ -10,7 +12,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body>
+      <body
+        style={
+          {
+            '--color-primary': branding.primaryColor,
+            '--color-secondary': branding.secondaryColor,
+          } as CSSProperties
+        }
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

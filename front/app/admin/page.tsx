@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminService } from '@/services/admin';
 import { Company, CompanyUser } from '@/types/admin';
+import { BrandLogo } from '@/components/branding/BrandLogo';
 
 type ErrorResponse = {
   errors?: string[];
@@ -153,20 +154,24 @@ export default function AdminPage() {
 
   if (role !== 'Admin') {
     return (
-      <main className="min-h-screen bg-gray-100 p-6">
+      <main className="min-h-screen bg-slate-50 p-4 sm:p-6">
         <Card className="mx-auto max-w-2xl">
           <h1 className="mb-2 text-2xl font-bold">Acesso restrito</h1>
-          <p className="text-gray-600">Apenas usuários com perfil Admin podem acessar esta página.</p>
+          <p className="text-slate-600">Apenas usuários com perfil Admin podem acessar esta página.</p>
         </Card>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2">
+    <main className="min-h-screen bg-slate-50 p-4 sm:p-6">
+      <div className="mx-auto mb-5 max-w-5xl">
+        <BrandLogo subtitle="Gestão multiempresa" />
+      </div>
+
+      <div className="mx-auto grid max-w-5xl gap-4 sm:gap-6 lg:grid-cols-2">
         <Card>
-          <h1 className="mb-4 text-2xl font-bold">Admin multiempresa</h1>
+          <h1 className="mb-4 text-xl font-bold text-slate-900 sm:text-2xl">Admin multiempresa</h1>
           <h2 className="mb-2 text-lg font-semibold">Cadastrar empresa</h2>
           <form className="space-y-4" onSubmit={handleCreateCompany}>
             <div>
@@ -193,15 +198,15 @@ export default function AdminPage() {
           </form>
 
           <div className="mt-6 border-t pt-4">
-            <h3 className="mb-2 text-sm font-semibold uppercase text-gray-500">Empresas cadastradas</h3>
+            <h3 className="mb-2 text-sm font-semibold uppercase text-slate-500">Empresas cadastradas</h3>
             <div className="space-y-2">
               {companies.length === 0 ? (
-                <p className="text-sm text-gray-600">Nenhuma empresa cadastrada.</p>
+                <p className="text-sm text-slate-600">Nenhuma empresa cadastrada.</p>
               ) : (
                 companies.map((company) => (
-                  <div key={company.id} className="rounded border bg-white p-3 text-sm">
+                  <div key={company.id} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
                     <p className="font-medium">{company.name}</p>
-                    <p className="text-gray-600">Slug: {company.slug}</p>
+                    <p className="text-slate-600">Slug: {company.slug}</p>
                   </div>
                 ))
               )}
@@ -278,18 +283,18 @@ export default function AdminPage() {
           </form>
 
           <div className="mt-6 border-t pt-4">
-            <h3 className="mb-2 text-sm font-semibold uppercase text-gray-500">
+            <h3 className="mb-2 text-sm font-semibold uppercase text-slate-500">
               Usuários {selectedCompany ? `de ${selectedCompany.name}` : ''}
             </h3>
             <div className="space-y-2">
               {companyUsers.length === 0 ? (
-                <p className="text-sm text-gray-600">Nenhum usuário para a empresa selecionada.</p>
+                <p className="text-sm text-slate-600">Nenhum usuário para a empresa selecionada.</p>
               ) : (
                 companyUsers.map((user) => (
-                  <div key={user.id} className="rounded border bg-white p-3 text-sm">
+                  <div key={user.id} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
                     <p className="font-medium">{user.name}</p>
-                    <p className="text-gray-600">{user.email}</p>
-                    <p className="text-gray-600">Perfil: {user.role}</p>
+                    <p className="text-slate-600">{user.email}</p>
+                    <p className="text-slate-600">Perfil: {user.role}</p>
                   </div>
                 ))
               )}
@@ -299,7 +304,7 @@ export default function AdminPage() {
       </div>
 
       {errorMessage && (
-        <div className="mx-auto mt-6 max-w-5xl rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+        <div className="mx-auto mt-6 max-w-5xl rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
           {errorMessage}
         </div>
       )}

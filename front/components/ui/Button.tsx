@@ -6,11 +6,12 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export function Button({ children, className = '', variant = 'primary', ...props }: ButtonProps) {
-  const baseClassName = 'rounded px-4 py-2 font-medium transition disabled:opacity-50';
+  const baseClassName =
+    'rounded-lg px-4 py-2 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]';
   const variantClassName =
     variant === 'secondary'
-      ? 'border border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
-      : 'bg-blue-600 text-white hover:bg-blue-700';
+      ? 'border border-[color:var(--color-border)] bg-white text-slate-700 hover:bg-slate-50'
+      : 'bg-[color:var(--color-primary)] text-white hover:brightness-95';
 
   return (
     <button className={`${baseClassName} ${variantClassName} ${className}`.trim()} {...props}>

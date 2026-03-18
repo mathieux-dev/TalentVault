@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { useCreateCandidate, useUploadResume } from '@/hooks/useCandidates';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { BrandLogo } from '@/components/branding/BrandLogo';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -70,8 +71,12 @@ export default function NewCandidatePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <Card className="mx-auto max-w-2xl">
+    <main className="min-h-screen bg-slate-50 p-4 sm:p-6">
+      <Card className="mx-auto max-w-2xl p-5 sm:p-6">
+        <div className="mb-6">
+          <BrandLogo subtitle="Cadastro interno" />
+        </div>
+
         <h1 className="mb-6 text-2xl font-bold">Novo Candidato</h1>
 
         {submitError && <p className="mb-4 text-sm text-red-600">{submitError}</p>}

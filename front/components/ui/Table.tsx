@@ -6,8 +6,8 @@ type TableProps = HTMLAttributes<HTMLDivElement> & {
 
 export function Table({ children, className = '', ...props }: TableProps) {
   return (
-    <div className={`overflow-x-auto ${className}`.trim()} {...props}>
-      <table className="min-w-full border-collapse border border-gray-200">{children}</table>
+    <div className={`overflow-x-auto rounded-lg border border-slate-200 ${className}`.trim()} {...props}>
+      <table className="min-w-full border-collapse">{children}</table>
     </div>
   );
 }

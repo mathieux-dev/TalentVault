@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { BrandLogo } from '@/components/branding/BrandLogo';
+import { branding, hasInitialBackground } from '@/config/branding';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -43,23 +45,39 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <Card className="w-96">
+    <main
+      className="flex min-h-screen items-center justify-center px-4 py-10"
+      style={
+        hasInitialBackground
+          ? {
+              backgroundImage: `linear-gradient(rgba(15,23,42,0.6), rgba(15,23,42,0.6)), url(${branding.initialBackgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : {
+              background:
+                'radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 16%, #ffffff), #f8fafc 45%, #f1f5f9 100%)',
+            }
+      }
+    >
+      <Card className="w-full max-w-md bg-white/95 p-6 sm:p-8">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <h1 className="mb-6 text-2xl font-bold">TalentVault</h1>
+          <div className="mb-6">
+            <BrandLogo subtitle="Acesse sua conta" />
+          </div>
 
-          {submitError && <p className="mb-4 text-sm text-red-600">{submitError}</p>}
+          {submitError && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{submitError}</p>}
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-slate-700">Email</label>
             <Input {...register('email')} type="email" className="mt-1" disabled={isPending} />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700">Senha</label>
+            <label className="block text-sm font-medium text-slate-700">Senha</label>
             <Input {...register('password')} type="password" className="mt-1" disabled={isPending} />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </div>
 
           <Button type="submit" disabled={isPending} className="w-full">
@@ -67,6 +85,6 @@ export const LoginForm = () => {
           </Button>
         </form>
       </Card>
-    </div>
+    </main>
   );
 };

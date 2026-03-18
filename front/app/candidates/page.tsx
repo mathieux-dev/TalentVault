@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select';
 import { Table } from '@/components/ui/Table';
 import { useCandidates } from '@/hooks/useCandidates';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { BrandLogo } from '@/components/branding/BrandLogo';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -101,17 +102,21 @@ function CandidatesPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
+    <main className="min-h-screen bg-slate-50 p-4 sm:p-6">
       <Card className="mx-auto max-w-5xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
+          <BrandLogo subtitle="Banco de talentos" />
+        </div>
+
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold">Candidatos</h1>
           <Link href="/candidates/new">
-            <Button>Novo candidato</Button>
+            <Button className="w-full sm:w-auto">Novo candidato</Button>
           </Link>
         </div>
 
         <Card className="mb-6">
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 lg:grid-cols-4">
             <div>
               <label className="mb-1 block text-sm font-medium">Cidade</label>
               <Input
@@ -143,11 +148,11 @@ function CandidatesPageContent() {
               />
             </div>
 
-            <div className="flex items-end gap-2">
-              <Button type="button" onClick={applyFilters}>
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
+              <Button type="button" onClick={applyFilters} className="w-full sm:w-auto">
                 Filtrar
               </Button>
-              <Button type="button" variant="secondary" onClick={clearFilters}>
+              <Button type="button" variant="secondary" onClick={clearFilters} className="w-full sm:w-auto">
                 Limpar
               </Button>
             </div>
@@ -166,7 +171,7 @@ function CandidatesPageContent() {
           <>
             <Table>
                 <thead>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-slate-50">
                     <th className="border border-gray-200 px-4 py-2 text-left">Nome</th>
                     <th className="border border-gray-200 px-4 py-2 text-left">Email</th>
                     <th className="border border-gray-200 px-4 py-2 text-left">Cidade</th>
@@ -191,7 +196,7 @@ function CandidatesPageContent() {
                         <td className="border border-gray-200 px-4 py-2">
                           <Link
                             href={`/candidates/${candidate.id}`}
-                            className="font-medium text-blue-600 hover:text-blue-800"
+                            className="font-semibold text-[color:var(--color-primary)] hover:brightness-90"
                           >
                             Ver detalhes
                           </Link>
@@ -202,8 +207,8 @@ function CandidatesPageContent() {
                 </tbody>
             </Table>
 
-            <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-slate-600">
                 Página {data.page} de {totalPages} • Total: {data.total}
               </p>
 

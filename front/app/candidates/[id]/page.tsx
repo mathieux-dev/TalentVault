@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useCandidate } from '@/hooks/useCandidates';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { BrandLogo } from '@/components/branding/BrandLogo';
 
 export default function CandidateDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -31,11 +32,15 @@ export default function CandidateDetailsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
+    <main className="min-h-screen bg-slate-50 p-4 sm:p-6">
       <Card className="mx-auto max-w-3xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4">
+          <BrandLogo subtitle="Detalhes do candidato" />
+        </div>
+
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold">Detalhes do Candidato</h1>
-          <Link href="/candidates" className="text-blue-600 hover:text-blue-800">
+          <Link href="/candidates" className="font-semibold text-[color:var(--color-primary)] hover:brightness-90">
             Voltar
           </Link>
         </div>
@@ -58,7 +63,7 @@ export default function CandidateDetailsPage() {
               <Button>Download resume</Button>
             </a>
           ) : (
-            <p className="text-gray-600">Currículo ainda não enviado.</p>
+            <p className="text-slate-600">Currículo ainda não enviado.</p>
           )}
         </div>
       </Card>
