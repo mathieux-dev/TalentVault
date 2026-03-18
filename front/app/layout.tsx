@@ -12,14 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body
-        style={
-          {
-            '--color-primary': branding.primaryColor,
-            '--color-secondary': branding.secondaryColor,
-          } as CSSProperties
-        }
-      >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

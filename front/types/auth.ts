@@ -8,6 +8,8 @@ export interface LoginResponse {
   userId: string;
   companyId: string;
   role: string;
+  email?: string;
+  name?: string;
 }
 
 export interface AuthContextType {

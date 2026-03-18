@@ -15,9 +15,15 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userId', data.userId);
+      localStorage.setItem('id', data.userId);
       localStorage.setItem('companyId', data.companyId);
       localStorage.setItem('role', data.role);
+      if (data.email) {
+        localStorage.setItem('email', data.email);
+      }
+      if (data.name) {
+        localStorage.setItem('name', data.name);
+      }
     },
   });
 };
