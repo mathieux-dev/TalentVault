@@ -61,7 +61,7 @@ public class CandidateService : ICandidateService
 
         try
         {
-            var resumeUrl = await _storageService.UploadResumeAsync(createdCandidate.Id, fileStream, fileName, cancellationToken);
+            var resumeUrl = await _storageService.UploadResumeAsync(companyId, createdCandidate.Id, fileStream, fileName, cancellationToken);
             createdCandidate.ResumeUrl = resumeUrl;
             await _candidateRepository.UpdateAsync(createdCandidate, cancellationToken);
             return MapToResponse(createdCandidate);
@@ -102,7 +102,7 @@ public class CandidateService : ICandidateService
         }
 
         // Upload file to storage
-        var resumeUrl = await _storageService.UploadResumeAsync(candidateId, fileStream, fileName, cancellationToken);
+        var resumeUrl = await _storageService.UploadResumeAsync(companyId, candidateId, fileStream, fileName, cancellationToken);
 
         // Update candidate with resume URL
         candidate.ResumeUrl = resumeUrl;
@@ -117,7 +117,7 @@ public class CandidateService : ICandidateService
         if (candidate == null)
             throw new InvalidOperationException("Candidato não encontrado");
 
-        return await _storageService.DownloadResumeAsync(candidateId, cancellationToken);
+        return await _storageService.DownloadResumeAsync(companyId, candidateId, cancellationToken);
     }
 
     private static CandidateResponse MapToResponse(Candidate candidate)
