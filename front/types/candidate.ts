@@ -35,7 +35,6 @@ export interface CreateCandidateRequest {
   phone: string;
   city: string;
   state?: string;
-  seniority: string;
 }
 
 export interface PublicCandidateSubmissionRequest extends CreateCandidateRequest {

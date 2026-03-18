@@ -56,7 +56,6 @@ export const candidatesService = {
     formData.append('phone', payload.phone);
     formData.append('city', payload.city);
     formData.append('state', payload.state ?? '');
-    formData.append('seniority', payload.seniority);
     formData.append('file', payload.file);
 
     const response = await api.post<ApiResponse<Candidate>>(
