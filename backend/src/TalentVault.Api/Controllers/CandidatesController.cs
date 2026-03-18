@@ -57,13 +57,27 @@ public class CandidatesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetList([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetList(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? city = null,
+        [FromQuery] string? seniority = null,
+        [FromQuery] string? skills = null,
+        CancellationToken cancellationToken = default)
     {
         var companyId = GetCompanyIdFromToken();
+        var parsedSkills = string.IsNullOrWhiteSpace(skills)
+            ? null
+            : skills.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        var filters = new CandidateFilters(
+            city,
+            seniority,
+            parsedSkills);
 
         try
         {
-            var candidates = await _candidateService.GetByCompanyAsync(companyId, page, pageSize, cancellationToken);
+            var candidates = await _candidateService.GetByCompanyAsync(companyId, page, pageSize, filters, cancellationToken);
             return Ok(new
             {
                 success = true,

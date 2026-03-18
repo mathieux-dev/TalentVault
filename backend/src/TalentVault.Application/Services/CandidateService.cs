@@ -8,7 +8,7 @@ public interface ICandidateService
 {
     Task<CandidateResponse> CreateAsync(Guid companyId, CreateCandidateRequest request, CancellationToken cancellationToken = default);
     Task<CandidateResponse> CreateWithResumeAsync(Guid companyId, CreateCandidateRequest request, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
-    Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page, int pageSize, CandidateFilters? filters = null, CancellationToken cancellationToken = default);
     Task<CandidateResponse?> GetByIdAsync(Guid Id, Guid companyId, CancellationToken cancellationToken = default);
     Task<string> UploadResumeAsync(Guid candidateId, Guid companyId, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
     Task<Stream> DownloadResumeAsync(Guid candidateId, Guid companyId, CancellationToken cancellationToken = default);
@@ -73,13 +73,13 @@ public class CandidateService : ICandidateService
         }
     }
 
-    public async Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
+    public async Task<CandidateListResponse> GetByCompanyAsync(Guid companyId, int page = 1, int pageSize = 20, CandidateFilters? filters = null, CancellationToken cancellationToken = default)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
-        var candidates = await _candidateRepository.GetByCompanyAsync(companyId, page, pageSize, cancellationToken);
-        var total = await _candidateRepository.GetCountByCompanyAsync(companyId, cancellationToken);
+        var candidates = await _candidateRepository.GetByCompanyAsync(companyId, page, pageSize, filters, cancellationToken);
+        var total = await _candidateRepository.GetCountByCompanyAsync(companyId, filters, cancellationToken);
 
         var items = candidates.Select(MapToResponse).ToList();
 

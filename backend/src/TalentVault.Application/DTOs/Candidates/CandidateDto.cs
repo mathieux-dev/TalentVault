@@ -25,6 +25,11 @@ public record CandidateListResponse(
     int PageSize,
     int Total);
 
+public record CandidateFilters(
+    string? City,
+    string? Seniority,
+    IEnumerable<string>? Skills);
+
 public class PublicCandidateSubmissionRequest
 {
     public string Name { get; set; } = string.Empty;
