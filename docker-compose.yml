@@ -30,6 +30,16 @@ services:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=talentvault_dev;Username=postgres;Password=postgres
       DatabaseInitialization__ApplyMigrationsOnStartup: "true"
       Seed__Enabled: "true"
+      Seed__CompanyName: ${SEED_COMPANY_NAME:-TalentVault Demo}
+      Seed__CompanySlug: ${SEED_COMPANY_SLUG:-talentvault-demo}
+      Seed__Admin__Name: ${SEED_ADMIN_NAME:-Admin User}
+      Seed__Admin__Email: ${SEED_ADMIN_EMAIL:-admin@talentvault.local}
+      Seed__Admin__Password: ${SEED_ADMIN_PASSWORD:-Admin123!}
+      Seed__Admin__Role: ${SEED_ADMIN_ROLE:-Admin}
+      Seed__Hr__Name: ${SEED_HR_NAME:-HR User}
+      Seed__Hr__Email: ${SEED_HR_EMAIL:-hr@talentvault.local}
+      Seed__Hr__Password: ${SEED_HR_PASSWORD:-Hr123456!}
+      Seed__Hr__Role: ${SEED_HR_ROLE:-HR}
       Supabase__Url: ${SUPABASE_URL:-}
       Supabase__ServiceRoleKey: ${SUPABASE_SERVICE_ROLE_KEY:-}
       Supabase__BucketName: ${SUPABASE_BUCKET_NAME:-resumes}
