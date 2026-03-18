@@ -1,6 +1,7 @@
 import api from '@/services/api';
 import {
   ApiResponse,
+  CandidateFilters,
   Candidate,
   CandidatesPageResponse,
   CreateCandidateRequest,
@@ -8,9 +9,15 @@ import {
 } from '@/types/candidate';
 
 export const candidatesService = {
-  async list(page: number, pageSize: number): Promise<CandidatesPageResponse> {
+  async list(page: number, pageSize: number, filters?: CandidateFilters): Promise<CandidatesPageResponse> {
     const response = await api.get<ApiResponse<CandidatesPageResponse>>('/candidates', {
-      params: { page, pageSize },
+      params: {
+        page,
+        pageSize,
+        city: filters?.city,
+        seniority: filters?.seniority,
+        skills: filters?.skills,
+      },
     });
     return response.data.data;
   },

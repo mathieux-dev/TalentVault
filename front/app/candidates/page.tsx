@@ -1,9 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { Table } from '@/components/ui/Table';
 import { useCandidates } from '@/hooks/useCandidates';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -11,14 +14,87 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function CandidatesPage() {
-  const [page, setPage] = useState(1);
+  return (
+    <Suspense fallback={<main className="p-6">Carregando...</main>}>
+      <CandidatesPageContent />
+    </Suspense>
+  );
+}
+
+function CandidatesPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const pageParam = Number(searchParams.get('page') ?? '1');
+  const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+
+  const city = searchParams.get('city') ?? '';
+  const seniority = searchParams.get('seniority') ?? '';
+  const skills = searchParams.get('skills') ?? '';
+
+  const [cityInput, setCityInput] = useState(city);
+  const [seniorityInput, setSeniorityInput] = useState(seniority);
+  const [skillsInput, setSkillsInput] = useState(skills);
+
   const { isCheckingAuth } = useRequireAuth();
-  const { data, isLoading, isError, error } = useCandidates(page, DEFAULT_PAGE_SIZE);
+  const { data, isLoading, isError, error } = useCandidates(page, DEFAULT_PAGE_SIZE, {
+    city: city || undefined,
+    seniority: seniority || undefined,
+    skills: skills || undefined,
+  });
 
   const totalPages = useMemo(() => {
     if (!data) return 1;
     return Math.max(1, Math.ceil(data.total / data.pageSize));
   }, [data]);
+
+  const updateQueryParams = (next: { page?: number; city?: string; seniority?: string; skills?: string }) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (next.page && next.page > 1) {
+      params.set('page', String(next.page));
+    } else {
+      params.delete('page');
+    }
+
+    if (next.city && next.city.trim().length > 0) {
+      params.set('city', next.city.trim());
+    } else {
+      params.delete('city');
+    }
+
+    if (next.seniority && next.seniority.trim().length > 0) {
+      params.set('seniority', next.seniority.trim());
+    } else {
+      params.delete('seniority');
+    }
+
+    if (next.skills && next.skills.trim().length > 0) {
+      params.set('skills', next.skills.trim());
+    } else {
+      params.delete('skills');
+    }
+
+    const query = params.toString();
+    router.replace(query.length > 0 ? `${pathname}?${query}` : pathname);
+  };
+
+  const applyFilters = () => {
+    updateQueryParams({
+      page: 1,
+      city: cityInput,
+      seniority: seniorityInput,
+      skills: skillsInput,
+    });
+  };
+
+  const clearFilters = () => {
+    setCityInput('');
+    setSeniorityInput('');
+    setSkillsInput('');
+    updateQueryParams({ page: 1, city: '', seniority: '', skills: '' });
+  };
 
   if (isCheckingAuth) {
     return <main className="p-6">Validando acesso...</main>;
@@ -33,6 +109,50 @@ export default function CandidatesPage() {
             <Button>Novo candidato</Button>
           </Link>
         </div>
+
+        <Card className="mb-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Cidade</label>
+              <Input
+                value={cityInput}
+                onChange={(event) => setCityInput(event.target.value)}
+                placeholder="Ex: São Paulo"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">Senioridade</label>
+              <Select
+                value={seniorityInput}
+                onChange={(event) => setSeniorityInput(event.target.value)}
+              >
+                <option value="">Todas</option>
+                <option value="Junior">Junior</option>
+                <option value="Pleno">Pleno</option>
+                <option value="Senior">Senior</option>
+              </Select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">Skills (vírgula)</label>
+              <Input
+                value={skillsInput}
+                onChange={(event) => setSkillsInput(event.target.value)}
+                placeholder="Ex: c#, sql"
+              />
+            </div>
+
+            <div className="flex items-end gap-2">
+              <Button type="button" onClick={applyFilters}>
+                Filtrar
+              </Button>
+              <Button type="button" variant="secondary" onClick={clearFilters}>
+                Limpar
+              </Button>
+            </div>
+          </div>
+        </Card>
 
         {isLoading && <p>Carregando candidatos...</p>}
 
@@ -91,7 +211,7 @@ export default function CandidatesPage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() => updateQueryParams({ page: Math.max(1, page - 1), city, seniority, skills })}
                   disabled={page <= 1}
                 >
                   Anterior
@@ -99,7 +219,7 @@ export default function CandidatesPage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                  onClick={() => updateQueryParams({ page: Math.min(totalPages, page + 1), city, seniority, skills })}
                   disabled={page >= totalPages}
                 >
                   Próxima

@@ -17,6 +17,12 @@ export interface CandidatesPageResponse {
   total: number;
 }
 
+export interface CandidateFilters {
+  city?: string;
+  seniority?: string;
+  skills?: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
