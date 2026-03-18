@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using FluentValidation;
+using System.Threading.RateLimiting;
+using TalentVault.Api.Middleware;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,11 +77,47 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            success = false,
+            errors = new[] { "Muitas requisições. Tente novamente em instantes." }
+        }, cancellationToken);
+    };
+
+    options.AddPolicy("PublicApplicationsPolicy", httpContext =>
+    {
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var companySlug = httpContext.Request.RouteValues.TryGetValue("companySlug", out var routeValue)
+            ? routeValue?.ToString()?.ToLowerInvariant() ?? "unknown"
+            : "unknown";
+
+        var partitionKey = $"{ipAddress}:{companySlug}";
+
+        return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            AutoReplenishment = true
+        });
+    });
+});
+
 var app = builder.Build();
 
 await app.InitializeDatabaseAsync();
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("Frontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

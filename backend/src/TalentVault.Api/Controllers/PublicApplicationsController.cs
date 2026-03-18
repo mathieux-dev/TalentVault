@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using TalentVault.Application.DTOs.Candidates;
 using TalentVault.Application.Repositories;
 using TalentVault.Application.Services;
@@ -25,6 +26,7 @@ public class PublicApplicationsController : ControllerBase
     }
 
     [HttpPost("{companySlug}")]
+    [EnableRateLimiting("PublicApplicationsPolicy")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Submit(
         [FromRoute] string companySlug,
@@ -61,44 +63,25 @@ public class PublicApplicationsController : ControllerBase
             });
         }
 
-        try
-        {
-            await using var stream = file.OpenReadStream();
-            var candidate = await _candidateService.CreateWithResumeAsync(
-                company.Id,
-                new CreateCandidateRequest(
-                    request.Name,
-                    request.Email,
-                    request.Phone,
-                    request.City,
-                    request.State,
-                    request.Seniority),
-                stream,
-                file.FileName,
-                cancellationToken);
+        await using var stream = file.OpenReadStream();
+        var candidate = await _candidateService.CreateWithResumeAsync(
+            company.Id,
+            new CreateCandidateRequest(
+                request.Name,
+                request.Email,
+                request.Phone,
+                request.City,
+                request.State,
+                request.Seniority),
+            stream,
+            file.FileName,
+            cancellationToken);
 
-            return Ok(new
-            {
-                success = true,
-                data = candidate,
-                errors = Array.Empty<string>()
-            });
-        }
-        catch (InvalidOperationException ex)
+        return Ok(new
         {
-            return BadRequest(new
-            {
-                success = false,
-                errors = new[] { ex.Message }
-            });
-        }
-        catch
-        {
-            return StatusCode(500, new
-            {
-                success = false,
-                errors = new[] { "Erro ao enviar candidatura" }
-            });
-        }
+            success = true,
+            data = candidate,
+            errors = Array.Empty<string>()
+        });
     }
 }
